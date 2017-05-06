@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">TestTask</string>
+    <string name="device_mem_label">Device memory</string>
+    <string name="current_continent">Continent</string>
+</resources>
