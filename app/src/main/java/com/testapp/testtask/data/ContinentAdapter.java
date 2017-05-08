@@ -14,15 +14,17 @@ import com.testapp.testtask.R;
 
 import java.util.List;
 
+import static java.security.AccessController.getContext;
+
 /**
  * Created by paul on 04.05.17.
  */
 
 public class ContinentAdapter extends RecyclerView.Adapter<ContinentAdapter.ViewHolder> {
 
-    private static List<Territory> mData;
+    private List<Territory> mData;
 
-    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public static class ViewHolder extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
         public TextView mTextView;
         public ConstraintLayout mConstraintLayout;
@@ -34,19 +36,9 @@ public class ContinentAdapter extends RecyclerView.Adapter<ContinentAdapter.View
             mGlobeIcon = (ImageView) v.findViewById(R.id.imageView_globe);
             mGlobeIcon.setColorFilter(R.color.colorIcons);
 
-            mConstraintLayout.setOnClickListener(this);
         }
 
-        @Override
-        public void onClick(View view) {
-            if(view.getId() == mConstraintLayout.getId()) {
-                Territory ter = mData.get(this.getAdapterPosition());
-                Intent intent = new Intent(mConstraintLayout.getContext(), CountriesActivity.class);
-                intent.putExtra("Continent", ter);
-                mConstraintLayout.getContext().startActivity(intent);
-            }
 
-        }
     }
 
     public ContinentAdapter(List<Territory> data) {
@@ -62,8 +54,18 @@ public class ContinentAdapter extends RecyclerView.Adapter<ContinentAdapter.View
     }
 
     @Override
-    public void onBindViewHolder(ContinentAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(final ContinentAdapter.ViewHolder holder, final int position) {
         holder.mTextView.setText(mData.get(position).getName());
+
+        holder.mConstraintLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Territory ter = mData.get(position);
+                Intent intent = new Intent(holder.mConstraintLayout.getContext(), CountriesActivity.class);
+                intent.putExtra("Continent", ter);
+                holder.mConstraintLayout.getContext().startActivity(intent);
+            }
+        });
     }
 
     @Override

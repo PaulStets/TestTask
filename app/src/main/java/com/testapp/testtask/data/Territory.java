@@ -42,7 +42,7 @@ public class Territory implements Serializable {
         return Collections.unmodifiableList(regions);
     }
 
-    public boolean hasChilden() {
+    public boolean hasChildren() {
         return hasChilden;
     }
 }

@@ -3,9 +3,12 @@ package com.testapp.testtask.data;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -18,9 +21,10 @@ import com.testapp.testtask.R;
 public class CountriesFragment extends Fragment {
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
-    private RecyclerView.LayoutManager mLayoutManager;
+    public LinearLayoutManager mLayoutManager;
+    private  static final String TAG = "CountriesFragment";
 
-    private Territory mTerritory;
+
 
     public CountriesFragment() {}
 
@@ -28,11 +32,15 @@ public class CountriesFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        Territory mTerritory;
         if (getArguments() != null) {
             mTerritory = (Territory) getArguments().getSerializable("Continent");
+            Log.e(TAG, "Creating from arguments");
         }
         else {
             mTerritory = (Territory) getActivity().getIntent().getSerializableExtra("Continent");
+            Log.e(TAG, "Creating from intent");
+            Log.e(TAG, "Number of children: " + String.valueOf(mTerritory.getRegions().size()));
         }
 
         View rootView = inflater.inflate(R.layout.countries_fragment, container, false);
@@ -44,17 +52,14 @@ public class CountriesFragment extends Fragment {
         mRecyclerView.setLayoutManager(mLayoutManager);
 
 
-
-        mAdapter = new CountryAdapter(mTerritory.getRegions(), getActivity());
+        mAdapter = new CountryAdapter(mTerritory.getRegions());
         mRecyclerView.setAdapter(mAdapter);
+        Log.e(TAG, "Adapter is set");
+
 
         return rootView;
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        mAdapter = new CountryAdapter(mTerritory.getRegions(), getActivity());
-        mRecyclerView.setAdapter(mAdapter);
-    }
+
+
 }

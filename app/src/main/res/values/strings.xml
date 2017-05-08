@@ -2,4 +2,8 @@
     <string name="app_name">TestTask</string>
     <string name="device_mem_label">Device memory</string>
     <string name="current_continent">Continent</string>
+    <string name="world_regions">World Regions</string>
+    <string name="region_name">Berlin</string>
+    <string name="cancel_button_label">CANCEL</string>
+    <string name="downloads">Downloads</string>
 </resources>
