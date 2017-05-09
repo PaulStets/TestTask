@@ -41,8 +41,8 @@ public class FreeSpaceData extends Fragment {
 
         ImageView used = (ImageView) rootView.findViewById(R.id.used_space);
         ImageView free = (ImageView) rootView.findViewById(R.id.free_spce);
-        long freeSpaceNum = DiskUtils.freeSpace(true);
-        long allSpace = DiskUtils.totalSpace(true);
+        float freeSpaceNum = DiskUtils.freeSpace(true);
+        float allSpace = DiskUtils.totalSpace(true);
 
         // Display free space
         String freeSpace = "Free " + freeSpaceNum + " GB";
@@ -52,7 +52,7 @@ public class FreeSpaceData extends Fragment {
         freeSpaceText.setText(sb);
 
         // Calculate and display free space graph.
-        float percentage = (float) freeSpaceNum / (float) allSpace;
+        float percentage = freeSpaceNum / allSpace;
         Context context = rootView.getContext();
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         Display display = wm.getDefaultDisplay();

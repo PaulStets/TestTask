@@ -12,9 +12,9 @@ import java.util.List;
 public class Territory implements Serializable {
     private String name;
     private List<Territory> regions;
-    private boolean hasChilden;
+    private boolean hasChildren;
 
-    public Territory(String name, List<Territory> regions, boolean hasChilden) {
+    public Territory(String name, List<Territory> regions, boolean hasChildren) {
         String nameParts[] = name.split("-");
         if (name.length() == 1) {
             this.name = name.substring(0, 1).toUpperCase() + name.substring(1);
@@ -31,7 +31,7 @@ public class Territory implements Serializable {
         }
 
         this.regions = regions;
-        this.hasChilden = hasChilden;
+        this.hasChildren = hasChildren;
     }
 
     public String getName() {
@@ -43,6 +43,6 @@ public class Territory implements Serializable {
     }
 
     public boolean hasChildren() {
-        return hasChilden;
+        return hasChildren;
     }
 }

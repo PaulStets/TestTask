@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.graphics.Point;
+import android.graphics.PorterDuff;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
@@ -26,6 +27,7 @@ import android.widget.Toast;
 import com.testapp.testtask.R;
 
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,6 +36,7 @@ import java.net.URL;
 import java.net.URLConnection;
 
 import static android.R.attr.width;
+import static android.os.Build.VERSION_CODES.M;
 import static java.security.AccessController.getContext;
 
 
@@ -52,7 +55,12 @@ public class DownloadingTask extends AsyncTask<String, Integer, Void> {
     private ConstraintLayout mLayout;
     private ProgressBar mProgressBar;
     private ImageView mCancelButton;
+    private ImageView mDownloadButton;
     private int width;
+
+    private static final long  MEGABYTE = 1024L * 1024L;
+    private int fileSizeInMb;
+    private int downloadedInMb;
 
     private DownloadingTask thisTask;
 
@@ -64,7 +72,7 @@ public class DownloadingTask extends AsyncTask<String, Integer, Void> {
     public DownloadingTask(Context context, TextView percentage, ImageView downloaded,
                     ImageView leftToLoad,
                     ConstraintLayout downloadLayout,
-                    ProgressBar progressBar, ImageView cancelButton) {
+                    ProgressBar progressBar, ImageView cancelButton, ImageView downloadButton) {
         mContext = context;
         this.percentage = percentage;
         this.downloaded = downloaded;
@@ -72,6 +80,7 @@ public class DownloadingTask extends AsyncTask<String, Integer, Void> {
         mLayout = downloadLayout;
         mProgressBar = progressBar;
         mCancelButton = cancelButton;
+        mDownloadButton = downloadButton;
         thisTask = this;
     }
 
@@ -92,6 +101,7 @@ public class DownloadingTask extends AsyncTask<String, Integer, Void> {
         }
         if(url != null && connection != null) {
             int lengthOfFile = connection.getContentLength();
+            fileSizeInMb = (int) (connection.getContentLength() / MEGABYTE);
             int count;
 
             // input stream to read file - with 8k buffer
@@ -103,6 +113,8 @@ public class DownloadingTask extends AsyncTask<String, Integer, Void> {
                 long total = 0;
                 while ((count = input.read(data)) != -1) {
                     total += count;
+                    downloadedInMb += count;
+                    downloadedInMb = (int) (total / MEGABYTE);
 
                     // writing data to file
                     output.write(data, 0, count);
@@ -139,9 +151,11 @@ public class DownloadingTask extends AsyncTask<String, Integer, Void> {
 
         width = (int) (getDisplayWidth() - px);
 
+        mDownloadButton.setVisibility(View.GONE);
+
         mCancelButton.setVisibility(View.VISIBLE);
         mCancelButton.setColorFilter(R.color.colorIcons);
-       // mProgressBar.setVisibility(View.VISIBLE);
+
 
 
         mProgressDialog = new Dialog(mLayout.getContext());
@@ -178,6 +192,8 @@ public class DownloadingTask extends AsyncTask<String, Integer, Void> {
             }
         });
 
+        mProgressBar.setVisibility(View.VISIBLE);
+
         // take CPU lock to prevent CPU from going off if the user
         // presses the power button during download
         PowerManager pm = (PowerManager) mContext
@@ -194,6 +210,10 @@ public class DownloadingTask extends AsyncTask<String, Integer, Void> {
         super.onProgressUpdate(progress);
 
         String update = String.valueOf(progress[0]) +"%";
+        String dialogMagabytes = String.valueOf(downloadedInMb)
+                + " Mb of " + String.valueOf(fileSizeInMb) + "Mb";
+
+        mProgressInMb.setText(dialogMagabytes);
 
         mProgressBar.setProgress(progress[0]);
         mDialogProgressBar.setProgress(progress[0]);
@@ -211,6 +231,32 @@ public class DownloadingTask extends AsyncTask<String, Integer, Void> {
         mProgressBar.setVisibility(View.GONE);
         mCancelButton.setVisibility(View.GONE);
         mProgressDialog.dismiss();
+
+        mDownloadButton.setVisibility(View.VISIBLE);
+        mDownloadButton.getDrawable()
+                .setColorFilter(mContext.getResources()
+                        .getColor(R.color.colorIconDownloaded),
+                        PorterDuff.Mode.SRC_IN);
+        mDownloadButton.setClickable(false);
+    }
+
+    @Override
+    protected void onCancelled() {
+        mWakeLock.release();
+        mLayout.setVisibility(View.GONE);
+        mProgressBar.setVisibility(View.GONE);
+        mCancelButton.setVisibility(View.GONE);
+        mProgressDialog.dismiss();
+        mDownloadButton.setVisibility(View.VISIBLE);
+        File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath(), "Berlin.zip");
+        if (file.exists()) {
+            file.delete();
+        }
+
+
+        super.onCancelled();
+
+
     }
 
 

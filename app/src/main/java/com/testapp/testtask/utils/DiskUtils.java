@@ -15,7 +15,7 @@ public class DiskUtils {
    * @param external  If true will query external disk, otherwise will query internal disk.
    * @return Number of gigabytes on disk.
    */
-  public static long totalSpace(boolean external)
+  public static float totalSpace(boolean external)
   {
     StatFs statFs = getStats(external);
     return ((statFs.getBlockCountLong()) * (statFs.getBlockSizeLong())) / GIGABYTE;
@@ -26,7 +26,7 @@ public class DiskUtils {
    * @param external  If true will query external disk, otherwise will query internal disk.
    * @return Number of free gigabytes on disk.
    */
-  public static long freeSpace(boolean external)
+  public static float freeSpace(boolean external)
   {
     StatFs statFs = getStats(external);
     long availableBlocks = statFs.getAvailableBlocksLong();

@@ -1,8 +1,11 @@
 package com.testapp.testtask.data;
 
 import android.content.Intent;
+import android.graphics.PorterDuff;
+import android.os.Environment;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +15,7 @@ import android.widget.TextView;
 
 import com.testapp.testtask.R;
 
+import java.io.File;
 import java.util.List;
 
 
@@ -36,8 +40,6 @@ public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.ViewHold
             mTextView = (TextView) v.findViewById(R.id.textView_country_name);
             mDownloadImage = (ImageView) v.findViewById(R.id.imageView_download_icon);
             mMapIcon = (ImageView) v.findViewById(R.id.imageView_map_icon);
-            mDownloadImage.setColorFilter(R.color.colorIcons);
-            mMapIcon.setColorFilter(R.color.colorIcons);
             mConstraintLayout = v;
             mProgressBar = (ProgressBar) v.findViewById(R.id.download_progressbar);
             mCancelButton = (ImageView) v.findViewById(R.id.imageView_cancel_icon);
@@ -62,6 +64,10 @@ public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.ViewHold
     @Override
     public void onBindViewHolder(final CountryAdapter.ViewHolder holder, final int position) {
         holder.mTextView.setText(mData.get(position).getName());
+        holder.mDownloadImage.setColorFilter(R.color.colorIcons);
+        holder.mMapIcon.setColorFilter(R.color.colorIcons);
+        holder.mProgressBar.setVisibility(View.GONE);
+        holder.mCancelButton.setVisibility(View.GONE);
         if (mData.get(position).hasChildren()) {
             holder.mDownloadImage.setVisibility(View.GONE);
         }
@@ -69,17 +75,31 @@ public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.ViewHold
             holder.mDownloadImage.setVisibility(View.VISIBLE);
         }
         if(holder.mTextView.getText().toString().equals("Berlin ")) {
-            holder.mDownloadImage.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent intent = new Intent("start.download.action");
-                    intent.putExtra("position", position);
-                    holder.mConstraintLayout.getContext().sendBroadcast(intent);
-                    holder.mDownloadImage.setVisibility(View.GONE);
 
+            File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath(),
+                    "Berlin.zip");
+            if (file.exists()) {
+                holder.mDownloadImage.getDrawable()
+                        .setColorFilter(holder
+                                .mDownloadImage.
+                                        getContext().
+                                        getResources().
+                                        getColor(R.color.colorIconDownloaded),
+                                                PorterDuff.Mode.SRC_IN);
+            }
+            else {
+                holder.mDownloadImage.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent intent = new Intent("start.download.action");
+                        intent.putExtra("position", position);
+                        holder.mConstraintLayout.getContext().sendBroadcast(intent);
+                        holder.mDownloadImage.setVisibility(View.INVISIBLE);
 
-                }
-            });
+                    }
+                });
+            }
+
         }
         holder.mConstraintLayout.setOnClickListener(new View.OnClickListener() {
             @Override

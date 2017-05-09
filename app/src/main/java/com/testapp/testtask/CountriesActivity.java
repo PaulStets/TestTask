@@ -71,6 +71,7 @@ public class CountriesActivity extends AppCompatActivity {
                             intent.getIntExtra("position", 0));
                     ProgressBar mProgressBar = (ProgressBar) constraintLayout.findViewById(R.id.download_progressbar);
                     ImageView mCancelButton = (ImageView) constraintLayout.findViewById(R.id.imageView_cancel_icon);
+                    ImageView mDownloadButton = (ImageView) constraintLayout.findViewById(R.id.imageView_download_icon);
 
                     DownloadFragment currDownloadFragment = (DownloadFragment) getSupportFragmentManager()
                             .findFragmentById(R.id.downloading_screen);
@@ -86,7 +87,8 @@ public class CountriesActivity extends AppCompatActivity {
                             mLeftToLoad,
                             mDownloadLayout,
                             mProgressBar,
-                            mCancelButton);
+                            mCancelButton,
+                            mDownloadButton);
 
                     mDownloadingTask.execute("http://download.osmand.net/download.php?standard=yes&file=Denmark_europe_2.obf.zip");
 
