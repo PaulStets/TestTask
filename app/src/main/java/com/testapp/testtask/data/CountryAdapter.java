@@ -5,7 +5,6 @@ import android.graphics.PorterDuff;
 import android.os.Environment;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,7 +19,7 @@ import java.util.List;
 
 
 /**
- * Created by paul on 05.05.17.
+ * Custom adapter for Countries recyclerView.
  */
 
 public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.ViewHolder> {
@@ -28,7 +27,7 @@ public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.ViewHold
     private List<Territory> mData;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        // each data item is just a string in this case
+        // Views inside the viewHolder.
         public TextView mTextView;
         public ImageView mDownloadImage;
         public ImageView mMapIcon;
@@ -79,13 +78,14 @@ public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.ViewHold
             File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath(),
                     "Berlin.zip");
             if (file.exists()) {
-                holder.mDownloadImage.getDrawable()
+                holder.mMapIcon.getDrawable()
                         .setColorFilter(holder
                                 .mDownloadImage.
                                         getContext().
                                         getResources().
                                         getColor(R.color.colorIconDownloaded),
                                                 PorterDuff.Mode.SRC_IN);
+                holder.mDownloadImage.setVisibility(View.GONE);
             }
             else {
                 holder.mDownloadImage.setOnClickListener(new View.OnClickListener() {

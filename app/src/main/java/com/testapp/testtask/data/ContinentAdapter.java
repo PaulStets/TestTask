@@ -14,8 +14,6 @@ import com.testapp.testtask.R;
 
 import java.util.List;
 
-import static java.security.AccessController.getContext;
-
 /**
  * Created by paul on 04.05.17.
  */

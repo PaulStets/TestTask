@@ -33,11 +33,9 @@
 
     <View
         android:layout_width="0dp"
-        app:layout_constraintLeft_toLeftOf="@id/textView_continent_name"
+        app:layout_constraintLeft_toLeftOf="@+id/textView_continent_name"
         android:layout_height="1dp"
         android:background="#e5e5e5"
-        tools:layout_editor_absoluteY="0dp"
-        tools:layout_editor_absoluteX="8dp"
         app:layout_constraintBottom_toBottomOf="parent"/>
 
 

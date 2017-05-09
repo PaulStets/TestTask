@@ -1,15 +1,11 @@
 package com.testapp.testtask.data;
 
-import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.os.AsyncTask;
-import android.os.Bundle;
 import android.os.Environment;
 import android.os.PowerManager;
 import android.support.constraint.ConstraintLayout;
@@ -35,18 +31,15 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
 
-import static android.R.attr.width;
-import static android.os.Build.VERSION_CODES.M;
-import static java.security.AccessController.getContext;
-
 
 /**
- * Created by paul on 08.05.17.
+ * Async task that deals with downloading of the file and publishing
+ * progress in UI.
  */
 
 public class DownloadingTask extends AsyncTask<String, Integer, Void> {
     private PowerManager.WakeLock mWakeLock;
-
+    // Variables to update the UI.
     private Context mContext;
     private Dialog mProgressDialog;
     private TextView percentage;
@@ -56,23 +49,27 @@ public class DownloadingTask extends AsyncTask<String, Integer, Void> {
     private ProgressBar mProgressBar;
     private ImageView mCancelButton;
     private ImageView mDownloadButton;
-    private int width;
+    private TextView mProgressInMb;
+    private ProgressBar mDialogProgressBar;
+    private Button dismissButton;
+    private ImageView mDialogCancel;
+    private ImageView mMapIcon;
 
-    private static final long  MEGABYTE = 1024L * 1024L;
+    private int width;
     private int fileSizeInMb;
     private int downloadedInMb;
 
     private DownloadingTask thisTask;
 
-    private TextView mProgressInMb;
-    private ProgressBar mDialogProgressBar;
-    private Button dismissButton;
-    private ImageView mDialogCancel;
+
+
+    private static final long  MEGABYTE = 1024L * 1024L;
 
     public DownloadingTask(Context context, TextView percentage, ImageView downloaded,
                     ImageView leftToLoad,
                     ConstraintLayout downloadLayout,
-                    ProgressBar progressBar, ImageView cancelButton, ImageView downloadButton) {
+                    ProgressBar progressBar, ImageView cancelButton,
+                           ImageView downloadButton, ImageView mapIcon) {
         mContext = context;
         this.percentage = percentage;
         this.downloaded = downloaded;
@@ -81,6 +78,7 @@ public class DownloadingTask extends AsyncTask<String, Integer, Void> {
         mProgressBar = progressBar;
         mCancelButton = cancelButton;
         mDownloadButton = downloadButton;
+        mMapIcon = mapIcon;
         thisTask = this;
     }
 
@@ -88,7 +86,7 @@ public class DownloadingTask extends AsyncTask<String, Integer, Void> {
 
     @Override
     protected Void doInBackground(String... urls) {
-        Log.d("Downloading", "Started Downloading of the map");
+
         String root = Environment.getExternalStorageDirectory().toString();
         URL url = null;
         URLConnection connection = null;
@@ -134,6 +132,9 @@ public class DownloadingTask extends AsyncTask<String, Integer, Void> {
                 input.close();
             } catch (IOException e) {
                 e.printStackTrace();
+                thisTask.cancel(true);
+                Toast.makeText(mContext, "Please check your Internet connection.", Toast.LENGTH_SHORT)
+                        .show();
             }
 
         }
@@ -144,11 +145,11 @@ public class DownloadingTask extends AsyncTask<String, Integer, Void> {
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-
+        // Convert margin into dp
         Resources resources = mContext.getResources();
         DisplayMetrics metrics = resources.getDisplayMetrics();
         float px = 48 * ((float)metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT);
-
+        // width - margin
         width = (int) (getDisplayWidth() - px);
 
         mDownloadButton.setVisibility(View.GONE);
@@ -157,34 +158,33 @@ public class DownloadingTask extends AsyncTask<String, Integer, Void> {
         mCancelButton.setColorFilter(R.color.colorIcons);
 
 
-
+        // Creates custom dialog window with the info about the download.
         mProgressDialog = new Dialog(mLayout.getContext());
         mProgressDialog.setContentView(R.layout.my_progressdialog);
-
+        // Get the refferences to Views in progress dialog
         mProgressInMb = (TextView) mProgressDialog.findViewById(R.id.textView_progress_in_mb);
         mDialogCancel = (ImageView) mProgressDialog.findViewById(R.id.imageView_remove_download);
         mDialogProgressBar = (ProgressBar) mProgressDialog.findViewById(R.id.progressBar);
         dismissButton = (Button) mProgressDialog.findViewById(R.id.button_cancel);
-
         mDialogCancel.setColorFilter(R.color.colorIcons);
-
+        // Set the width of progress dialog to fill the screen.
         mProgressDialog.getWindow().setLayout(ConstraintLayout.LayoutParams.MATCH_PARENT,
                 ConstraintLayout.LayoutParams.WRAP_CONTENT);
-
+        // Set listener for "CANCEL" button.
         dismissButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 mProgressDialog.dismiss();
             }
         });
-
+        // Set listener for X button.
         mDialogCancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                thisTask.cancel(true);
+                thisTask.onCancelled();
             }
         });
-
+        // Set listener on the whole downloading layout to show the dialog.
         mLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -192,9 +192,16 @@ public class DownloadingTask extends AsyncTask<String, Integer, Void> {
             }
         });
 
+        mCancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                thisTask.onCancelled();
+            }
+        });
+        // Show progress bar underneath the region title.
         mProgressBar.setVisibility(View.VISIBLE);
 
-        // take CPU lock to prevent CPU from going off if the user
+        // CPU lock prevents CPU from going off if the user
         // presses the power button during download
         PowerManager pm = (PowerManager) mContext
                 .getSystemService(Context.POWER_SERVICE);
@@ -208,13 +215,14 @@ public class DownloadingTask extends AsyncTask<String, Integer, Void> {
     @Override
     protected void onProgressUpdate(Integer... progress) {
         super.onProgressUpdate(progress);
-
+        // Percentage of completion.
         String update = String.valueOf(progress[0]) +"%";
+        // Downloaded megabytes.
         String dialogMagabytes = String.valueOf(downloadedInMb)
                 + " Mb of " + String.valueOf(fileSizeInMb) + "Mb";
 
+        // Update the views.
         mProgressInMb.setText(dialogMagabytes);
-
         mProgressBar.setProgress(progress[0]);
         mDialogProgressBar.setProgress(progress[0]);
         percentage.setText(update);
@@ -231,37 +239,41 @@ public class DownloadingTask extends AsyncTask<String, Integer, Void> {
         mProgressBar.setVisibility(View.GONE);
         mCancelButton.setVisibility(View.GONE);
         mProgressDialog.dismiss();
-
-        mDownloadButton.setVisibility(View.VISIBLE);
-        mDownloadButton.getDrawable()
+        // Make the icon green.
+        mMapIcon.getDrawable()
                 .setColorFilter(mContext.getResources()
                         .getColor(R.color.colorIconDownloaded),
                         PorterDuff.Mode.SRC_IN);
-        mDownloadButton.setClickable(false);
+        mDownloadButton.setVisibility(View.GONE);
     }
 
     @Override
     protected void onCancelled() {
-        mWakeLock.release();
+        if (mWakeLock.isHeld()) {
+            mWakeLock.release();
+        }
+
         mLayout.setVisibility(View.GONE);
         mProgressBar.setVisibility(View.GONE);
         mCancelButton.setVisibility(View.GONE);
         mProgressDialog.dismiss();
         mDownloadButton.setVisibility(View.VISIBLE);
+        Log.e("DownloadingTask", "Cancelling download in onCancelled");
+        // Delete downloaded info, if exists.
         File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath(), "Berlin.zip");
         if (file.exists()) {
             file.delete();
         }
-
-
-        super.onCancelled();
-
-
+        thisTask.cancel(true);
     }
 
 
 
 
+    /**
+     * Determines the width of a given display.
+     * @return the width of the display in px.
+     */
     public int getDisplayWidth() {
         WindowManager wm = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         Display display = wm.getDefaultDisplay();

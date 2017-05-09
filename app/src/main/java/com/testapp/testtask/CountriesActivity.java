@@ -4,14 +4,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -72,6 +70,7 @@ public class CountriesActivity extends AppCompatActivity {
                     ProgressBar mProgressBar = (ProgressBar) constraintLayout.findViewById(R.id.download_progressbar);
                     ImageView mCancelButton = (ImageView) constraintLayout.findViewById(R.id.imageView_cancel_icon);
                     ImageView mDownloadButton = (ImageView) constraintLayout.findViewById(R.id.imageView_download_icon);
+                    ImageView mMapIcon = (ImageView) constraintLayout.findViewById(R.id.imageView_map_icon);
 
                     DownloadFragment currDownloadFragment = (DownloadFragment) getSupportFragmentManager()
                             .findFragmentById(R.id.downloading_screen);
@@ -88,16 +87,12 @@ public class CountriesActivity extends AppCompatActivity {
                             mDownloadLayout,
                             mProgressBar,
                             mCancelButton,
-                            mDownloadButton);
+                            mDownloadButton,
+                            mMapIcon);
 
                     mDownloadingTask.execute("http://download.osmand.net/download.php?standard=yes&file=Denmark_europe_2.obf.zip");
 
-                    mCancelButton.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            mDownloadingTask.cancel(true);
-                        }
-                    });
+
 
 
                 }

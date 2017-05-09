@@ -24,11 +24,14 @@ import com.testapp.testtask.utils.DiskUtils;
 
 /**
  * Created by paul on 03.05.17.
+ * A fragment to display free space on the device;
  */
 
 public class FreeSpaceData extends Fragment {
 
     private static final String TAG = "FreeSpaceData";
+
+    public View rootView;
 
     public FreeSpaceData() {
 
@@ -36,7 +39,7 @@ public class FreeSpaceData extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.free_space_fragment, container, false);
+        rootView = inflater.inflate(R.layout.free_space_fragment, container, false);
         TextView freeSpaceText = (TextView) rootView.findViewById(R.id.textView_free_mem);
 
         ImageView used = (ImageView) rootView.findViewById(R.id.used_space);
@@ -59,13 +62,13 @@ public class FreeSpaceData extends Fragment {
         Point size = new Point();
         display.getSize(size);
         int width = size.x;
-        used.getLayoutParams().width = (int) (width * percentage);
+        free.getLayoutParams().width = (int) (width * percentage);
 
         Resources resources = context.getResources();
         DisplayMetrics metrics = resources.getDisplayMetrics();
         float px = 24 * ((float)metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT);
         Log.e(TAG, String.valueOf(px));
-        free.getLayoutParams().width = (int) (width - (width * percentage) - px);
+        used.getLayoutParams().width = (int) (width - (width * percentage) - px);
 
         return rootView;
     }

@@ -18,7 +18,7 @@
         tools:text="@string/device_mem_label"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        android:layout_marginLeft="24dp"
+        android:layout_marginLeft="12dp"
         android:layout_marginTop="16dp" />
 
     <TextView
@@ -32,11 +32,10 @@
         android:layout_alignBaseline="@+id/textView_device_mem_label"
         android:layout_alignBottom="@+id/textView_device_mem_label"
         android:layout_toEndOf="@+id/textView_device_mem_label"
-        android:layout_marginStart="76dp"
         android:layout_marginEnd="16dp"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginTop="16dp"
-        android:layout_marginRight="24dp"
+        android:layout_marginRight="16dp"
         app:layout_constraintRight_toRightOf="parent" />
 
    <ImageView
@@ -44,7 +43,6 @@
        android:layout_height="30dp"
        android:id="@+id/used_space"
        android:background="#ff8800"
-       android:layout_marginLeft="0dp"
        app:layout_constraintLeft_toLeftOf="@+id/textView_device_mem_label"
        android:layout_marginTop="16dp"
        app:layout_constraintTop_toBottomOf="@+id/textView_device_mem_label" />
@@ -58,4 +56,22 @@
         android:paddingBottom="16dp"
         app:layout_constraintTop_toBottomOf="@+id/textView_device_mem_label"
         android:layout_marginTop="16dp" />
+
+    <TextView
+        android:layout_width="0dp"
+        android:id="@+id/world_regions_label"
+        android:layout_height="80dp"
+        android:background="@drawable/shadow"
+        android:text="@string/world_regions"
+        android:textAlignment="gravity"
+        android:paddingLeft="16dp"
+        android:textSize="16sp"
+        android:textColor="#212121"
+        android:gravity="bottom"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@+id/used_space"
+        android:layout_marginLeft="0dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginRight="0dp"
+        app:layout_constraintRight_toRightOf="parent" />
 </android.support.constraint.ConstraintLayout>

@@ -2,38 +2,42 @@ package com.testapp.testtask;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
-import android.content.res.XmlResourceParser;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.widget.Toast;
 
-import org.w3c.dom.*;
-import org.xml.sax.SAXException;
-
-import javax.xml.parsers.*;
-import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-
 import com.testapp.testtask.data.ContinentAdapter;
 import com.testapp.testtask.data.FreeSpaceData;
 import com.testapp.testtask.data.Territory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
     private static final int REQUEST_CODE = 300;
-
     private List<Territory> allRegions;
-
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
@@ -43,26 +47,39 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         checkPermission();
+
         mRecyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
         mRecyclerView.setHasFixedSize(true);
 
-        mLayoutManager = new LinearLayoutManager(this);
+        mLayoutManager = new LinearLayoutManager(getApplicationContext());
         mRecyclerView.setLayoutManager(mLayoutManager);
+
+        mAdapter = new ContinentAdapter(new ArrayList<Territory>());
+        mRecyclerView.setAdapter(mAdapter);
+
+
+
 
 
 
         allRegions = new ArrayList<>();
-
+        // Initialize the free space fragment.
         FreeSpaceData freeSpaceData = new FreeSpaceData();
         FragmentManager fragmentManager = getSupportFragmentManager();
-
         fragmentManager.beginTransaction()
                 .add(R.id.free_space_container, freeSpaceData)
                 .commit();
-    loadCountries.execute();
+        fragmentManager.executePendingTransactions();
+        // Fetch the xml countries data asynchronously.
+        loadCountries.execute();
+
+
 
     }
 
+    /**
+     * Asks for storage permission.
+     */
     private void checkPermission() {
         if (Build.VERSION.SDK_INT >= 23) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission_group.STORAGE) !=
@@ -73,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    // asyncTask to fetch countries' names and load them into Territory.
     public AsyncTask<Void, Void, List<Territory>> loadCountries = new AsyncTask<Void, Void, List<Territory>>() {
         @Override
         protected List<Territory> doInBackground(Void... voids) {
@@ -114,8 +132,16 @@ public class MainActivity extends AppCompatActivity {
         }
 
         protected void onPostExecute(List<Territory> result) {
+
+
             mAdapter = new ContinentAdapter(result);
+            mAdapter.notifyItemRangeChanged(0, mAdapter.getItemCount());
+
+//            mRecyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
             mRecyclerView.setAdapter(mAdapter);
+
+
+
         }
 
 
@@ -131,13 +157,11 @@ public class MainActivity extends AppCompatActivity {
                     Element element = (Element) node;
                     String name = element.getAttribute("name");
                     if(!element.hasChildNodes() && !name.isEmpty()) {
-                        Territory ter = new Territory(name, new ArrayList<Territory>(),
-                                false);
+                        Territory ter = new Territory(name, new ArrayList<Territory>());
                         allNodes.add(ter);
                     }
                     else if (!name.isEmpty()) {
-                        Territory ter = new Territory(name, parseNodes(element.getChildNodes()),
-                                true);
+                        Territory ter = new Territory(name, parseNodes(element.getChildNodes()));
                         allNodes.add(ter);
                     }
                 }
