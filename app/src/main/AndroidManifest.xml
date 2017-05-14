@@ -26,12 +26,15 @@
         <activity android:name=".CountriesActivity"
             android:label="@string/current_continent"
             android:screenOrientation="portrait"
+            android:configChanges="keyboardHidden|screenSize"
             >
 
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.testapp.testtask.MainActivity" />
         </activity>
+
+        <service android:name=".data.DownloadingService"/>
     </application>
 
 </manifest>

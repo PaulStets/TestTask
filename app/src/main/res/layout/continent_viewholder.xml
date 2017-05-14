@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="52dp"
     xmlns:tools="http://schemas.android.com/tools"
-    android:background="#ffffff">
+    android:clickable="true"
+    android:background="@drawable/selector_item_clicked">
 
     <ImageView
         android:layout_width="wrap_content"

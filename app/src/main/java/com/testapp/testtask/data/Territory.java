@@ -1,5 +1,7 @@
 package com.testapp.testtask.data;
 
+import android.support.annotation.NonNull;
+
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
@@ -9,7 +11,7 @@ import java.util.List;
  * Recursive abstract data type to store the regions from xml file.
  */
 
-public class Territory implements Serializable {
+public class Territory implements Serializable, Comparable {
     private String name;
     private List<Territory> regions;
 
@@ -57,6 +59,19 @@ public class Territory implements Serializable {
         }
         else {
             return true;
+        }
+    }
+
+    @Override
+    public int compareTo(@NonNull Object thatObj) {
+        int result = -15;
+        if (thatObj instanceof Territory) {
+            Territory thatTerritory = (Territory) thatObj;
+            result = this.getName().compareTo(thatTerritory.getName());
+            return result;
+        }
+        else {
+            return result;
         }
     }
 }

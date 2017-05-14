@@ -161,7 +161,7 @@ public class DownloadingTask extends AsyncTask<String, Integer, Void> {
         // Creates custom dialog window with the info about the download.
         mProgressDialog = new Dialog(mLayout.getContext());
         mProgressDialog.setContentView(R.layout.my_progressdialog);
-        // Get the refferences to Views in progress dialog
+        // Get the references to Views in progress dialog
         mProgressInMb = (TextView) mProgressDialog.findViewById(R.id.textView_progress_in_mb);
         mDialogCancel = (ImageView) mProgressDialog.findViewById(R.id.imageView_remove_download);
         mDialogProgressBar = (ProgressBar) mProgressDialog.findViewById(R.id.progressBar);
@@ -215,19 +215,7 @@ public class DownloadingTask extends AsyncTask<String, Integer, Void> {
     @Override
     protected void onProgressUpdate(Integer... progress) {
         super.onProgressUpdate(progress);
-        // Percentage of completion.
-        String update = String.valueOf(progress[0]) +"%";
-        // Downloaded megabytes.
-        String dialogMagabytes = String.valueOf(downloadedInMb)
-                + " Mb of " + String.valueOf(fileSizeInMb) + "Mb";
 
-        // Update the views.
-        mProgressInMb.setText(dialogMagabytes);
-        mProgressBar.setProgress(progress[0]);
-        mDialogProgressBar.setProgress(progress[0]);
-        percentage.setText(update);
-        downloaded.getLayoutParams().width = (int) (width*((float)progress[0]/(float)100));
-        leftToLoad.getLayoutParams().width = (int) (width - (width*(float)progress[0]/(float)100));
 
     }
 

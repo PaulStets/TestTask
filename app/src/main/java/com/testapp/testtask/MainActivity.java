@@ -1,17 +1,20 @@
 package com.testapp.testtask;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.ShareCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.util.Xml;
 import android.widget.Toast;
 
 import com.testapp.testtask.data.ContinentAdapter;
@@ -23,15 +26,21 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlPullParserFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+
+import static java.util.Collections.sort;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -57,11 +66,6 @@ public class MainActivity extends AppCompatActivity {
         mAdapter = new ContinentAdapter(new ArrayList<Territory>());
         mRecyclerView.setAdapter(mAdapter);
 
-
-
-
-
-
         allRegions = new ArrayList<>();
         // Initialize the free space fragment.
         FreeSpaceData freeSpaceData = new FreeSpaceData();
@@ -72,9 +76,6 @@ public class MainActivity extends AppCompatActivity {
         fragmentManager.executePendingTransactions();
         // Fetch the xml countries data asynchronously.
         loadCountries.execute();
-
-
-
     }
 
     /**
@@ -123,10 +124,7 @@ public class MainActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
 
-
-
-
-            }
+        }
 
             return allRegions;
         }
@@ -137,7 +135,6 @@ public class MainActivity extends AppCompatActivity {
             mAdapter = new ContinentAdapter(result);
             mAdapter.notifyItemRangeChanged(0, mAdapter.getItemCount());
 
-//            mRecyclerView.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
             mRecyclerView.setAdapter(mAdapter);
 
 
@@ -167,6 +164,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
+        Collections.sort(allNodes);
         return allNodes;
     }
 

@@ -1,10 +1,18 @@
 package com.testapp.testtask.data;
 
+import android.app.Activity;
+import android.app.Fragment;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.PorterDuff;
+import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.support.constraint.ConstraintLayout;
+import android.support.v4.app.FragmentManager;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,10 +20,13 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.testapp.testtask.CountriesActivity;
 import com.testapp.testtask.R;
 
 import java.io.File;
 import java.util.List;
+
+import static com.testapp.testtask.data.DownloadingService.cancelled;
 
 
 /**
@@ -25,6 +36,8 @@ import java.util.List;
 public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.ViewHolder> {
 
     private List<Territory> mData;
+    private Context mContext;
+    CountriesActivity currentActivity;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         // Views inside the viewHolder.
@@ -47,8 +60,9 @@ public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.ViewHold
 
     }
 
-    public CountryAdapter(List<Territory> data) {
+    public CountryAdapter(List<Territory> data, Context context) {
         mData = data;
+        mContext = context;
 
     }
 
@@ -62,56 +76,55 @@ public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.ViewHold
 
     @Override
     public void onBindViewHolder(final CountryAdapter.ViewHolder holder, final int position) {
+        currentActivity = (CountriesActivity) mContext;
         holder.mTextView.setText(mData.get(position).getName());
         holder.mDownloadImage.setColorFilter(R.color.colorIcons);
         holder.mMapIcon.setColorFilter(R.color.colorIcons);
         holder.mProgressBar.setVisibility(View.GONE);
         holder.mCancelButton.setVisibility(View.GONE);
+
         if (mData.get(position).hasChildren()) {
             holder.mDownloadImage.setVisibility(View.GONE);
+            holder.mConstraintLayout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Territory ter = mData.get(position);
+                    Log.e("CountryAdapter", "OnClick mConstraintLayout");
+                    FragmentManager fragmentManager = ((CountriesActivity) mContext)
+                            .getSupportFragmentManager();
+                    CountriesFragment countriesFragment1 = new CountriesFragment();
+                    Bundle bundle = new Bundle();
+                    bundle.putSerializable("Continent", ter);
+                    currentActivity.addActivityName(ter.getName());
+                    currentActivity.setTitle(ter.getName());
+                    countriesFragment1.setArguments(bundle);
+                    fragmentManager.beginTransaction()
+                            .replace(R.id.countries_list, countriesFragment1)
+                            .addToBackStack(null)
+                            .commitAllowingStateLoss();
+                    fragmentManager.executePendingTransactions();
+                }
+            });
         }
         else {
             holder.mDownloadImage.setVisibility(View.VISIBLE);
         }
-        if(holder.mTextView.getText().toString().equals("Berlin ")) {
 
-            File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath(),
-                    "Berlin.zip");
-            if (file.exists()) {
-                holder.mMapIcon.getDrawable()
-                        .setColorFilter(holder
-                                .mDownloadImage.
-                                        getContext().
-                                        getResources().
-                                        getColor(R.color.colorIconDownloaded),
-                                                PorterDuff.Mode.SRC_IN);
-                holder.mDownloadImage.setVisibility(View.GONE);
-            }
-            else {
-                holder.mDownloadImage.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Intent intent = new Intent("start.download.action");
-                        intent.putExtra("position", position);
-                        holder.mConstraintLayout.getContext().sendBroadcast(intent);
-                        holder.mDownloadImage.setVisibility(View.INVISIBLE);
-
-                    }
-                });
-            }
-
-        }
-        holder.mConstraintLayout.setOnClickListener(new View.OnClickListener() {
+        holder.mDownloadImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Territory ter = mData.get(position);
-                if (ter.hasChildren()) {
-                    Intent intent = new Intent("start.regions.action");
-                    intent.putExtra("Continent", ter);
-                    holder.mConstraintLayout.getContext().sendBroadcast(intent);
-                }
+                Intent intent = new Intent(mContext,
+                        DownloadingService.class);
+                intent.putExtra("url", "http://download.osmand.net/download.php?standard=yes&file=Denmark_europe_2.obf.zip");
+                intent.putExtra("holderPosition", position);
+                Log.w("CountryAdapter", "Passing Receiver to the Service");
+                cancelled = false;
+                intent.putExtra("RegionName", mData.get(position).getName());
+                mContext.startService(intent);
             }
         });
+
+
 
 
     }
