@@ -20,7 +20,7 @@ import com.testapp.testtask.R;
 public class DownloadFragment extends Fragment {
 
     public TextView percentage;
-    private TextView label;
+    public TextView label;
     public ImageView downloaded;
     public ImageView leftToLoad;
     public ConstraintLayout mLayout;
@@ -45,17 +45,9 @@ public class DownloadFragment extends Fragment {
 
         mLayout = (ConstraintLayout) rootView;
 
-
-
-        label.setText("Downloading Berlin");
-
         percentage.setText("0%");
 
-
-
-
         return rootView;
-
 
     }
 

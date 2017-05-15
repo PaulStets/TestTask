@@ -4,7 +4,6 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.ResultReceiver;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -32,6 +31,7 @@ public class DownloadingService extends IntentService {
 
     private InputStream input;
     private OutputStream output;
+    private String regionName;
 
 
     public DownloadingService() {
@@ -41,24 +41,29 @@ public class DownloadingService extends IntentService {
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
         String urlToDownload = intent.getStringExtra("url");
+        regionName = intent.getStringExtra("RegionName");
         Log.e("DownloadingService", urlToDownload);
         LocalBroadcastManager manager = LocalBroadcastManager.getInstance(this);
 
         Intent intentToSend = new Intent("download.initialize");
-        intentToSend.putExtra("holderPos", intent.getIntExtra("holderPosition", -1));
-        intentToSend.putExtra("RegionName", intent.getStringExtra("RegionName"));
+        intentToSend.putExtra("RegionName", regionName);
         manager.sendBroadcast(intentToSend);
         Log.e("DownloadService", "Broadcast sent");
         try {
             URL url = new URL(urlToDownload);
             URLConnection connection = url.openConnection();
             connection.connect();
-            // this will be useful so that you can show a typical 0-100% progress bar
+
             int fileLength = connection.getContentLength();
 
             // download the file
             input = new BufferedInputStream(connection.getInputStream());
-            output = new FileOutputStream("/sdcard/Berlin.zip");
+            File file = new File(Environment.getExternalStorageDirectory() + "/Maps/");
+            if (!file.exists()) {
+                file.mkdirs();
+            }
+            output = new FileOutputStream(Environment.getExternalStorageDirectory() + "/Maps/" +
+                    regionName.replace(" ", "") + ".zip");
 
             byte data[] = new byte[1024];
             long total = 0;
@@ -70,7 +75,7 @@ public class DownloadingService extends IntentService {
                 resultData.putInt("fileLengthMb", (int)(fileLength/MEGABYTE));
                 resultData.putLong("downloadedInMb", (total/MEGABYTE));
                 resultData.putInt("progress" ,(int) (total * 100 / fileLength));
-                resultData.putInt("holderPos", intent.getIntExtra("holderPosition", -1));
+                resultData.putString("RegionName", regionName);
                 Intent intentResults = new Intent("update.data");
                 intentResults.putExtras(resultData);
                 manager.sendBroadcast(intentResults);
@@ -80,6 +85,7 @@ public class DownloadingService extends IntentService {
             output.close();
             input.close();
             if (cancelled) {
+                sendDestroy();
                 onDestroy();
             }
         } catch (IOException e) {
@@ -94,9 +100,10 @@ public class DownloadingService extends IntentService {
 
     }
 
-    @Override
-    public void onDestroy() {
-        File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath(), "Berlin.zip");
+
+    public void sendDestroy() {
+        File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath() +
+                "/Maps/" + regionName.replace(" ", "") + ".zip");
         if (file.exists()) {
             file.delete();
         }

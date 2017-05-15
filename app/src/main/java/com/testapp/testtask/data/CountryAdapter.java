@@ -108,6 +108,15 @@ public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.ViewHold
         }
         else {
             holder.mDownloadImage.setVisibility(View.VISIBLE);
+            File file = new File(Environment.getExternalStorageDirectory() + "/Maps/" + holder.mTextView
+                    .getText().toString().replace(" ", "") + ".zip");
+            if (file.exists()) {
+                holder.mDownloadImage.setVisibility(View.GONE);
+                holder.mMapIcon.getDrawable()
+                        .setColorFilter(mContext.getResources()
+                                        .getColor(R.color.colorIconDownloaded),
+                                PorterDuff.Mode.SRC_IN);
+            }
         }
 
         holder.mDownloadImage.setOnClickListener(new View.OnClickListener() {
@@ -116,10 +125,14 @@ public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.ViewHold
                 Intent intent = new Intent(mContext,
                         DownloadingService.class);
                 intent.putExtra("url", "http://download.osmand.net/download.php?standard=yes&file=Denmark_europe_2.obf.zip");
-                intent.putExtra("holderPosition", position);
                 Log.w("CountryAdapter", "Passing Receiver to the Service");
                 cancelled = false;
                 intent.putExtra("RegionName", mData.get(position).getName());
+                holder.mDownloadImage.getDrawable()
+                        .setColorFilter(mContext.getResources()
+                                        .getColor(R.color.colorPrimary),
+                                PorterDuff.Mode.SRC_IN);
+                notifyItemChanged(position);
                 mContext.startService(intent);
             }
         });

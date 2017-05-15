@@ -14,10 +14,19 @@ import java.util.List;
 public class Territory implements Serializable, Comparable {
     private String name;
     private List<Territory> regions;
+    private String url;
 
     public Territory(String name, List<Territory> regions) {
         this.name = name;
         this.regions = regions;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public String getUrl() {
+        return url;
     }
 
     /**

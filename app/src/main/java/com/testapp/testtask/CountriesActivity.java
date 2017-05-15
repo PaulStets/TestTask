@@ -33,8 +33,9 @@ import android.widget.Toast;
 import com.testapp.testtask.data.CountriesFragment;
 import com.testapp.testtask.data.DownloadFragment;
 import com.testapp.testtask.data.DownloadingService;
-import com.testapp.testtask.data.DownloadingTask;
 import com.testapp.testtask.data.Territory;
+
+import org.w3c.dom.Text;
 
 import java.util.Stack;
 
@@ -51,7 +52,6 @@ public class CountriesActivity extends AppCompatActivity {
     private static final String TAG = "CountriesActivity";
     private Territory mTerritory;
     private Stack<String> activityName;
-    private Context mContext;
 
     private Dialog mProgressDialog;
     private TextView mPercentage;
@@ -67,7 +67,6 @@ public class CountriesActivity extends AppCompatActivity {
     private ImageView mDialogCancel;
     private ImageView mMapIcon;
 
-    private int holderPosition;
     private BroadcastReceiver mResultsReceiver;
 
     private CountriesFragment countriesFrag;
@@ -79,7 +78,6 @@ public class CountriesActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_countries);
         mTerritory = (Territory) getIntent().getSerializableExtra("Continent");
-        mContext = this;
         activityName = new Stack<>();
         activityName.add(mTerritory.getName());
         setTitle(activityName.peek());
@@ -107,13 +105,16 @@ public class CountriesActivity extends AppCompatActivity {
                     // Downloaded megabytes.
                     String dialogMagabytes = String.valueOf(intent.getLongExtra("downloadedInMb", -1))
                             + " Mb of " + String.valueOf(intent.getIntExtra("fileLengthMb", -1)) + "Mb";
-
+                    populateRecyclerView(intent.getStringExtra("RegionName"));
                     // Update the views.
                     if (mProgressInMb == null) {
                         showDownloadingScreen(intent);
                     }
                     mProgressInMb.setText(dialogMagabytes);
-                    mProgressBar.setProgress(progress);
+                    if (mProgressBar != null) {
+                        mProgressBar.setProgress(progress);
+                    }
+
                     mDialogProgressBar.setProgress(progress);
                     mPercentage.setText(update);
                     mDownloaded.getLayoutParams().width = (int) (width*((float)progress/(float)100));
@@ -122,24 +123,31 @@ public class CountriesActivity extends AppCompatActivity {
                     if (intent.getIntExtra("progress", -1) == 100) {
                         Toast.makeText(context, "Download finished", Toast.LENGTH_SHORT).show();
                         mDownloadLayout.setVisibility(View.GONE);
-                        mProgressBar.setVisibility(View.GONE);
-                        mCancelButton.setVisibility(View.GONE);
+
                         mProgressDialog.dismiss();
-                        // Make the icon green.
-                        mMapIcon.getDrawable()
-                                .setColorFilter(context.getResources()
-                                                .getColor(R.color.colorIconDownloaded),
-                                        PorterDuff.Mode.SRC_IN);
-                        mDownloadButton.setVisibility(View.GONE);
+                        if (mProgressBar != null && mMapIcon != null && mDownloadButton != null
+                                && mCancelButton != null) {
+                            mCancelButton.setVisibility(View.GONE);
+                            mProgressBar.setVisibility(View.GONE);
+                            // Make the icon green.
+                            mMapIcon.getDrawable()
+                                    .setColorFilter(context.getResources()
+                                                    .getColor(R.color.colorIconDownloaded),
+                                            PorterDuff.Mode.SRC_IN);
+                            mDownloadButton.setVisibility(View.GONE);
+                        }
+
                     }
 
                 }
                 else if (intent.getAction().equals("download.cancel")) {
                     mDownloadLayout.setVisibility(View.GONE);
-                    mProgressBar.setVisibility(View.GONE);
-                    mCancelButton.setVisibility(View.GONE);
+                    if (mProgressBar != null && mCancelButton != null && mDownloadButton != null) {
+                        mProgressBar.setVisibility(View.GONE);
+                        mCancelButton.setVisibility(View.GONE);
+                        mDownloadButton.setVisibility(View.VISIBLE);
+                    }
                     mProgressDialog.dismiss();
-                    mDownloadButton.setVisibility(View.VISIBLE);
                     Log.e("DownloadingTask", "Cancelling download in onCancelled");
                     cancelled = false;
                 }
@@ -210,45 +218,32 @@ public class CountriesActivity extends AppCompatActivity {
         activityName.add(newName);
     }
 
-    public void initUiComponents(int holderPos) {
+    public void initDownloadScreen(String regionName) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         DownloadFragment downloadinFragment = new DownloadFragment();
         getSupportFragmentManager().beginTransaction().add(R.id.downloading_screen, downloadinFragment)
                 .commitAllowingStateLoss();
-        getSupportFragmentManager().executePendingTransactions();
+        fragmentManager.executePendingTransactions();
 
 
-        countriesFrag = (CountriesFragment)
-                fragmentManager.findFragmentById(R.id.countries_list);
-
-        LinearLayoutManager layoutManager = countriesFrag.mLayoutManager;
-
-        ConstraintLayout constraintLayout = (ConstraintLayout) layoutManager.findViewByPosition(
-                holderPos);
-        mProgressBar = (ProgressBar) constraintLayout.findViewById(R.id.download_progressbar);
-        mCancelButton = (ImageView) constraintLayout.findViewById(R.id.imageView_cancel_icon);
-        mDownloadButton = (ImageView) constraintLayout.findViewById(R.id.imageView_download_icon);
-        mMapIcon = (ImageView) constraintLayout.findViewById(R.id.imageView_map_icon);
-
-        DownloadFragment currDownloadFragment = (DownloadFragment) getSupportFragmentManager()
+        DownloadFragment currDownloadFragment = (DownloadFragment) fragmentManager
                 .findFragmentById(R.id.downloading_screen);
 
         mPercentage = currDownloadFragment.percentage;
         mDownloaded = currDownloadFragment.downloaded;
         mLeftToLoad = currDownloadFragment.leftToLoad;
         mDownloadLayout = currDownloadFragment.mLayout;
+        TextView label = currDownloadFragment.label;
+        String labelText = "Downloading " + regionName;
+        label.setText(labelText);
     }
 
     public void showDownloadingScreen(Intent intent) {
-        holderPosition = intent.getIntExtra("holderPos", -1);
-        Log.e(TAG, "Holder Position: " + holderPosition);
-        initUiComponents(holderPosition);
 
-        mDownloadButton.setVisibility(View.GONE);
-
-        mCancelButton.setVisibility(View.VISIBLE);
-        mCancelButton.setColorFilter(R.color.colorIcons);
-
+        String regionName = intent.getStringExtra("RegionName");
+        Log.e(TAG, regionName);
+        initDownloadScreen(regionName);
+        populateRecyclerView(regionName);
 
         // Creates custom dialog window with the info about the download.
         mProgressDialog = new Dialog(mDownloadLayout.getContext());
@@ -259,6 +254,9 @@ public class CountriesActivity extends AppCompatActivity {
         mDialogProgressBar = (ProgressBar) mProgressDialog.findViewById(R.id.progressBar);
         dismissButton = (Button) mProgressDialog.findViewById(R.id.button_cancel);
         mDialogCancel.setColorFilter(R.color.colorIcons);
+
+        TextView cityLabel = (TextView) mProgressDialog.findViewById(R.id.city_label);
+        cityLabel.setText(regionName);
         // Set the width of progress dialog to fill the screen.
         mProgressDialog.getWindow().setLayout(ConstraintLayout.LayoutParams.MATCH_PARENT,
                 ConstraintLayout.LayoutParams.WRAP_CONTENT);
@@ -284,21 +282,49 @@ public class CountriesActivity extends AppCompatActivity {
             }
         });
 
-        mCancelButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                cancelled = true;
-            }
-        });
-        // Show progress bar underneath the region title.
-        mProgressBar.setVisibility(View.VISIBLE);
-
         // Convert margin into dp
         Resources resources = this.getResources();
         DisplayMetrics metrics = resources.getDisplayMetrics();
         float px = 48 * ((float)metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT);
         // width - margin
         width = (int) (getDisplayWidth() - px);
+    }
+
+    public void populateRecyclerView(String name) {
+        countriesFrag = (CountriesFragment)
+                getSupportFragmentManager().findFragmentById(R.id.countries_list);
+
+        RecyclerView layoutManager = countriesFrag.mRecyclerView;
+
+        for (int i = 0; i < layoutManager.getChildCount(); i++) {
+            ConstraintLayout constraintLayout = (ConstraintLayout) layoutManager.getChildAt(i);
+            TextView countryName;
+            if (constraintLayout.findViewById(R.id.textView_country_name) != null) {
+                countryName = (TextView) constraintLayout.findViewById(R.id.textView_country_name);
+                if (countryName.getText().toString().equals(name)) {
+                    mProgressBar = (ProgressBar) constraintLayout.findViewById(R.id.download_progressbar);
+                    mCancelButton = (ImageView) constraintLayout.findViewById(R.id.imageView_cancel_icon);
+                    mDownloadButton = (ImageView) constraintLayout.findViewById(R.id.imageView_download_icon);
+                    mMapIcon = (ImageView) constraintLayout.findViewById(R.id.imageView_map_icon);
+
+                    mDownloadButton.setVisibility(View.GONE);
+
+                    mCancelButton.setVisibility(View.VISIBLE);
+                    mCancelButton.setColorFilter(R.color.colorIcons);
+
+                    mCancelButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            cancelled = true;
+                        }
+                    });
+                    // Show progress bar underneath the region title.
+                    mProgressBar.setVisibility(View.VISIBLE);
+                }
+            }
+        }
+
+
     }
 
 

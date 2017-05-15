@@ -45,6 +45,8 @@ import static java.util.Collections.sort;
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
+    private static final String BASE_URL = "http://download.osmand.net/download.php?standard=yes&file=";
+    private static final  String URL_END = "_2.obf.zip";
     private static final int REQUEST_CODE = 300;
     private List<Territory> allRegions;
     private RecyclerView mRecyclerView;
@@ -144,17 +146,56 @@ public class MainActivity extends AppCompatActivity {
 
     };
 
+    String innerDownloadSuffix = "";
+    String innerDownloadPrefix = "";
+
     private List<Territory> parseNodes(NodeList regions) {
         int length = regions.getLength();
         List<Territory> allNodes = new ArrayList<>();
         if(length > 0) {
+
             for (int i = 0; i < length; i++) {
                 Node node = regions.item(i);
                 if(node.getNodeType() == Node.ELEMENT_NODE) {
                     Element element = (Element) node;
                     String name = element.getAttribute("name");
+                    if (!element.getAttribute("inner_download_suffix").isEmpty()) {
+                        innerDownloadSuffix = element.getAttribute("inner_download_suffix");
+                    }
+                    if (!element.getAttribute("inner_download_prefix").isEmpty()) {
+                        innerDownloadPrefix = element.getAttribute("inner_download_prefix");
+                    }
+
                     if(!element.hasChildNodes() && !name.isEmpty()) {
                         Territory ter = new Territory(name, new ArrayList<Territory>());
+                        String nameVar = element.getAttribute("name");
+                        String cap = nameVar.substring(0, 1).toUpperCase() + nameVar.substring(1);
+                        if (!innerDownloadPrefix.isEmpty()) {
+
+                            if (innerDownloadPrefix.equals("$name")) {
+                                Element parent = (Element) element.getParentNode();
+                                if (!parent.getAttribute("inner_download_prefix").isEmpty()) {
+                                    innerDownloadPrefix = parent.getAttribute("name");
+                                }
+                                else {
+                                    Element parentParent = (Element) parent.getParentNode();
+                                    innerDownloadPrefix = parent.getAttribute("inner_download_prefix");
+                                }
+
+                            }
+
+
+                            String resultUrl = BASE_URL+innerDownloadPrefix+"_"+cap+
+                                    "_"+innerDownloadSuffix+URL_END;
+                            ter.setUrl(resultUrl);
+                            Log.d(TAG, resultUrl);
+                        }
+                        else {
+                            String result = BASE_URL+cap+"_"+innerDownloadSuffix+URL_END;
+                            Log.d(TAG, result);
+                            ter.setUrl(result);
+                        }
+
                         allNodes.add(ter);
                     }
                     else if (!name.isEmpty()) {

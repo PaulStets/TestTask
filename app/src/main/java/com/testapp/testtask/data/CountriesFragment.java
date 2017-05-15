@@ -2,6 +2,7 @@ package com.testapp.testtask.data;
 
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -52,6 +53,7 @@ public class CountriesFragment extends Fragment {
         mRecyclerView.setLayoutManager(mLayoutManager);
 
 
+
         mAdapter = new CountryAdapter(mTerritory.getRegions(), getActivity());
         mRecyclerView.setAdapter(mAdapter);
         Log.e(TAG, "Adapter is set");
@@ -62,7 +64,13 @@ public class CountriesFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        mLayoutManager.onSaveInstanceState();
+
+    }
+
+    @Override
+    public void onActivityCreated(Bundle bundle) {
+        super.onActivityCreated(bundle);
+        Log.e(TAG, "Created Countries activity");
     }
 
 
@@ -71,5 +79,10 @@ public class CountriesFragment extends Fragment {
     public void onResume() {
         super.onResume();
         Log.e(TAG, "OnRresumeFragment");
+
+    }
+
+    public LinearLayoutManager getLayoutManager() {
+        return mLayoutManager;
     }
 }
