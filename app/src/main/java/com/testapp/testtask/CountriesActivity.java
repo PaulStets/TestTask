@@ -10,13 +10,10 @@ import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.ResultReceiver;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -32,17 +29,10 @@ import android.widget.Toast;
 
 import com.testapp.testtask.data.CountriesFragment;
 import com.testapp.testtask.data.DownloadFragment;
-import com.testapp.testtask.data.DownloadingService;
 import com.testapp.testtask.data.Territory;
-
-import org.w3c.dom.Text;
 
 import java.util.Stack;
 
-import static android.R.attr.width;
-import static com.testapp.testtask.R.id.downloaded;
-import static com.testapp.testtask.data.DownloadingService.CANCEL_DOWNLOAD;
-import static com.testapp.testtask.data.DownloadingService.START_DOWNLOAD;
 import static com.testapp.testtask.data.DownloadingService.cancelled;
 
 
@@ -136,7 +126,6 @@ public class CountriesActivity extends AppCompatActivity {
                                             PorterDuff.Mode.SRC_IN);
                             mDownloadButton.setVisibility(View.GONE);
                         }
-
                     }
 
                 }
@@ -153,11 +142,6 @@ public class CountriesActivity extends AppCompatActivity {
                 }
             }
         };
-//        if (isMyServiceRunning(DownloadingService.class)) {
-//            Intent intent = new Intent("download.initialize");
-//            intent.putExtra("holderPos", holderPosition);
-//            showDownloadingScreen(intent);
-//        }
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
@@ -323,8 +307,6 @@ public class CountriesActivity extends AppCompatActivity {
                 }
             }
         }
-
-
     }
 
 
@@ -339,16 +321,4 @@ public class CountriesActivity extends AppCompatActivity {
         display.getSize(size);
         return size.x;
     }
-
-    private boolean isMyServiceRunning(Class<?> serviceClass) {
-        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (serviceClass.getName().equals(service.service.getClassName())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-
 }

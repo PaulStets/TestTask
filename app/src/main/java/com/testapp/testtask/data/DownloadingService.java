@@ -7,7 +7,6 @@ import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileOutputStream;

@@ -1,16 +1,12 @@
 package com.testapp.testtask.data;
 
-import android.app.Activity;
-import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Handler;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.FragmentManager;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -57,13 +53,11 @@ public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.ViewHold
             mCancelButton = (ImageView) v.findViewById(R.id.imageView_cancel_icon);
 
         }
-
     }
 
     public CountryAdapter(List<Territory> data, Context context) {
         mData = data;
         mContext = context;
-
     }
 
     @Override
@@ -136,10 +130,6 @@ public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.ViewHold
                 mContext.startService(intent);
             }
         });
-
-
-
-
     }
 
     @Override

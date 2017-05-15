@@ -1,8 +1,6 @@
 package com.testapp.testtask.data;
 
 import android.os.Bundle;
-import android.os.Parcelable;
-import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
