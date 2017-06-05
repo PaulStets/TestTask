@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.testapp.testtask.MainActivity;
 import com.testapp.testtask.R;
 
 /**
@@ -21,7 +22,6 @@ public class CountriesFragment extends Fragment {
     public LinearLayoutManager mLayoutManager;
     private  static final String TAG = "CountriesFragment";
 
-    private Bundle mBundleRecyclerViewState;
 
 
 
@@ -50,9 +50,14 @@ public class CountriesFragment extends Fragment {
         mLayoutManager = new LinearLayoutManager(rootView.getContext());
         mRecyclerView.setLayoutManager(mLayoutManager);
 
+        String terrName = mTerritory.getName();
+        if (terrName.equals("World Regions ")) {
+            mAdapter = new ContinentAdapter(mTerritory.getRegions(), (MainActivity) getActivity());
+        }
+        else {
+            mAdapter = new CountryAdapter(mTerritory.getRegions(), (MainActivity) getActivity());
+        }
 
-
-        mAdapter = new CountryAdapter(mTerritory.getRegions(), getActivity());
         mRecyclerView.setAdapter(mAdapter);
         Log.e(TAG, "Adapter is set");
 
@@ -66,21 +71,10 @@ public class CountriesFragment extends Fragment {
     }
 
     @Override
-    public void onActivityCreated(Bundle bundle) {
-        super.onActivityCreated(bundle);
-        Log.e(TAG, "Created Countries activity");
-    }
-
-
-
-    @Override
     public void onResume() {
         super.onResume();
         Log.e(TAG, "OnRresumeFragment");
 
     }
 
-    public LinearLayoutManager getLayoutManager() {
-        return mLayoutManager;
-    }
 }

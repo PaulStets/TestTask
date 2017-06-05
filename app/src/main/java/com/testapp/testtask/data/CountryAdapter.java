@@ -15,8 +15,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
-import com.testapp.testtask.CountriesActivity;
+import com.testapp.testtask.MainActivity;
 import com.testapp.testtask.R;
 
 import java.io.File;
@@ -32,8 +31,8 @@ import static com.testapp.testtask.data.DownloadingService.cancelled;
 public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.ViewHolder> {
 
     private List<Territory> mData;
+    private MainActivity currentActivity;
     private Context mContext;
-    CountriesActivity currentActivity;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         // Views inside the viewHolder.
@@ -55,9 +54,10 @@ public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.ViewHold
         }
     }
 
-    public CountryAdapter(List<Territory> data, Context context) {
+    public CountryAdapter(List<Territory> data, MainActivity activity) {
         mData = data;
-        mContext = context;
+        currentActivity = activity;
+        mContext = activity;
     }
 
     @Override
@@ -70,7 +70,6 @@ public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.ViewHold
 
     @Override
     public void onBindViewHolder(final CountryAdapter.ViewHolder holder, final int position) {
-        currentActivity = (CountriesActivity) mContext;
         holder.mTextView.setText(mData.get(position).getName());
         holder.mDownloadImage.setColorFilter(R.color.colorIcons);
         holder.mMapIcon.setColorFilter(R.color.colorIcons);
@@ -84,7 +83,7 @@ public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.ViewHold
                 public void onClick(View view) {
                     Territory ter = mData.get(position);
                     Log.e("CountryAdapter", "OnClick mConstraintLayout");
-                    FragmentManager fragmentManager = ((CountriesActivity) mContext)
+                    FragmentManager fragmentManager = currentActivity
                             .getSupportFragmentManager();
                     CountriesFragment countriesFragment1 = new CountriesFragment();
                     Bundle bundle = new Bundle();
@@ -93,7 +92,7 @@ public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.ViewHold
                     currentActivity.setTitle(ter.getName());
                     countriesFragment1.setArguments(bundle);
                     fragmentManager.beginTransaction()
-                            .replace(R.id.countries_list, countriesFragment1)
+                            .replace(R.id.bottom_container, countriesFragment1)
                             .addToBackStack(null)
                             .commitAllowingStateLoss();
                     fragmentManager.executePendingTransactions();
